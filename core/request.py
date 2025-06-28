@@ -57,3 +57,35 @@ class Request:
 
         return req
 
+    @property
+    def content_type(self):
+        return self.headers.get("content-type", "")
+
+    @property
+    def content_length(self):
+        try:
+            return int(self.headers.get("content-length", 0))
+        except ValueError:
+            return 0
+
+    def json(self):
+        """Parse request body as JSON."""
+        try:
+            return json.loads(self.body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return None
+
+    def form_data(self):
+        """Parse URL-encoded form data."""
+        try:
+            return {k: v[0] if len(v) == 1 else v
+                    for k, v in parse_qs(self.body.decode("utf-8")).items()}
+        except UnicodeDecodeError:
+            return {}
+
+    @property
+    def is_json(self):
+        return "application/json" in self.content_type
+
+    def get_header(self, name, default=None):
+        return self.headers.get(name.lower(), default)
