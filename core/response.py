@@ -56,3 +56,26 @@ class Response:
         self.headers["Content-Type"] = "text/plain; charset=utf-8"
         return self
 
+    def redirect(self, url, permanent=False):
+        """Send redirect response."""
+        self.status = 301 if permanent else 302
+        self.headers["Location"] = url
+        self._body = b""
+        return self
+
+    def send_file(self, filepath):
+        """Send a file as response."""
+        if not os.path.isfile(filepath):
+            self.status = 404
+            self._body = b"File not found"
+            return self
+
+        mime, _ = mimetypes.guess_type(filepath)
+        self.headers["Content-Type"] = mime or "application/octet-stream"
+
+        with open(filepath, "rb") as f:
+            self._body = f.read()
+
+        self.headers["Content-Length"] = str(len(self._body))
+        return self
+
