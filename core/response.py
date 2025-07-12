@@ -79,3 +79,27 @@ class Response:
         self.headers["Content-Length"] = str(len(self._body))
         return self
 
+    def set_cookie(self, name, value, max_age=None, path="/", httponly=True, secure=False):
+        """Set a cookie."""
+        cookie = f"{name}={value}; Path={path}"
+        if max_age is not None:
+            cookie += f"; Max-Age={max_age}"
+        if httponly:
+            cookie += "; HttpOnly"
+        if secure:
+            cookie += "; Secure"
+        self.headers["Set-Cookie"] = cookie
+        return self
+
+    def build(self):
+        """Build the raw HTTP response bytes."""
+        status_msg = STATUS_MESSAGES.get(self.status, "Unknown")
+        self.headers["Content-Length"] = str(len(self._body))
+
+        lines = [f"HTTP/1.1 {self.status} {status_msg}"]
+        for key, value in self.headers.items():
+            lines.append(f"{key}: {value}")
+        lines.append("")
+
+        header_bytes = "\r\n".join(lines).encode("utf-8") + b"\r\n"
+        return header_bytes + self._body
