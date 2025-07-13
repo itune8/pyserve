@@ -48,3 +48,18 @@ class HTTPServer:
     def delete(self, path):
         return self.route(path, ["DELETE"])
 
+    # ── Middleware ────────────────────────────────────────────────
+
+    def use(self, middleware):
+        """Register a middleware function.
+
+        Middleware signature: middleware(request, response, next_handler) -> response
+        """
+        self._middlewares.append(middleware)
+        return self
+
+    def error_handler(self, handler):
+        """Register a global error handler."""
+        self._error_handler = handler
+        return handler
+
