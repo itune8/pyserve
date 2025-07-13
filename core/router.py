@@ -51,3 +51,27 @@ class Router:
                 })
         return result
 
+    def _compile_pattern(self, path):
+        """Compile a route pattern with :param placeholders into a regex.
+
+        Examples:
+            /users          -> ^/users$
+            /users/:id      -> ^/users/([^/]+)$
+            /files/*path    -> ^/files/(.+)$
+        """
+        param_names = []
+        parts = path.split("/")
+        regex_parts = []
+
+        for part in parts:
+            if part.startswith(":"):
+                param_names.append(part[1:])
+                regex_parts.append("([^/]+)")
+            elif part.startswith("*"):
+                param_names.append(part[1:])
+                regex_parts.append("(.+)")
+            else:
+                regex_parts.append(re.escape(part))
+
+        pattern = "^" + "/".join(regex_parts) + "$"
+        return re.compile(pattern), param_names
