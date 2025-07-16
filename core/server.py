@@ -130,3 +130,43 @@ class HTTPServer:
         finally:
             client_sock.close()
 
+    def _process_request(self, request):
+        """Process request through middleware chain and router."""
+        try:
+            handler, params = self.router.match(request.method, request.path)
+            request.params = params
+
+            if handler is None:
+                return Response(status=404, body="404 Not Found")
+
+            # Build middleware chain
+            def final_handler(req, res):
+                result = handler(req, res)
+                if isinstance(result, Response):
+                    return result
+                return res
+
+            chain = final_handler
+            for mw in reversed(self._middlewares):
+                prev = chain
+                chain = lambda req, res, _mw=mw, _prev=prev: _mw(req, res, _prev)
+
+            response = Response()
+            result = chain(request, response)
+            return result if isinstance(result, Response) else response
+
+        except Exception as e:
+            if self._error_handler:
+                try:
+                    return self._error_handler(request, e)
+                except Exception:
+                    pass
+            return Response(status=500, body=f"Internal Server Error: {e}")
+
+    def _log_request(self, request, response):
+        """Log request to stdout."""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        color = "\033[32m" if response.status < 400 else "\033[31m"
+        reset = "\033[0m"
+        print(f"  {color}{request.method} {request.path} -> {response.status}{reset} "
+              f"[{timestamp}] {request.client_ip}")
