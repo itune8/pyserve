@@ -27,3 +27,28 @@ class TokenBucket:
                 return True
             return False
 
+
+def rate_limiter(requests_per_second=10, burst=20):
+    """Create a rate limiting middleware."""
+    buckets = {}
+    lock = threading.Lock()
+
+    def middleware(request, response, next_handler):
+        client_ip = request.client_ip
+
+        with lock:
+            if client_ip not in buckets:
+                buckets[client_ip] = TokenBucket(requests_per_second, burst)
+
+        bucket = buckets[client_ip]
+        if not bucket.consume():
+            return Response(status=429, body="Rate limit exceeded. Try again later.")
+
+        result = next_handler(request, response)
+
+        if hasattr(result, 'set_header'):
+            result.set_header("X-RateLimit-Limit", str(burst))
+
+        return result
+
+    return middleware
