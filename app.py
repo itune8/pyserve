@@ -52,3 +52,26 @@ def index(req, res):
     """)
 
 
+@app.get("/health")
+def health(req, res):
+    return res.json({"status": "healthy", "server": "PyServe/1.0"})
+
+
+@app.get("/api/info")
+def server_info(req, res):
+    import platform
+    return res.json({
+        "server": "PyServe/1.0",
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "host": f"{app.host}:{app.port}",
+        "workers": app.workers,
+        "routes": app.router.route_count(),
+    })
+
+
+@app.get("/api/routes")
+def list_routes(req, res):
+    return res.json(app.router.list_routes())
+
+
