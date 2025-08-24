@@ -95,3 +95,23 @@ def get_user(req, res):
     return res.json(user)
 
 
+@app.post("/api/echo")
+def echo(req, res):
+    return res.json({
+        "method": req.method,
+        "path": req.path,
+        "headers": req.headers,
+        "query": req.query,
+        "body": req.body.decode("utf-8", errors="replace"),
+        "content_type": req.content_type,
+    })
+
+
+@app.error_handler
+def handle_error(req, error):
+    from core.response import Response
+    return Response().json({"error": str(error), "path": req.path}, status=500)
+
+
+if __name__ == "__main__":
+    app.start()
