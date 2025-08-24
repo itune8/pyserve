@@ -75,3 +75,23 @@ def list_routes(req, res):
     return res.json(app.router.list_routes())
 
 
+USERS = {
+    "1": {"id": 1, "name": "Alice", "email": "alice@example.com"},
+    "2": {"id": 2, "name": "Bob", "email": "bob@example.com"},
+    "3": {"id": 3, "name": "Charlie", "email": "charlie@example.com"},
+}
+
+
+@app.get("/api/users")
+def get_users(req, res):
+    return res.json(list(USERS.values()))
+
+
+@app.get("/api/users/:id")
+def get_user(req, res):
+    user = USERS.get(req.params["id"])
+    if not user:
+        return res.json({"error": "User not found"}, status=404)
+    return res.json(user)
+
+
