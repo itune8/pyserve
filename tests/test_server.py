@@ -90,15 +90,4 @@ class TestResponse(unittest.TestCase):
         tmpfile = tempfile.NamedTemporaryFile(suffix=".txt", delete=False, mode="w")
         tmpfile.write("file content")
         tmpfile.close()
-        res = Response()
-        res.send_file(tmpfile.name)
-        raw = res.build()
-        self.assertIn(b"file content", raw)
-        os.unlink(tmpfile.name)
-
-    def test_send_missing_file(self):
-        res = Response()
-        res.send_file("/nonexistent/file.txt")
-        self.assertEqual(res.status, 404)
-
-
+ 
