@@ -90,4 +90,78 @@ class TestResponse(unittest.TestCase):
         tmpfile = tempfile.NamedTemporaryFile(suffix=".txt", delete=False, mode="w")
         tmpfile.write("file content")
         tmpfile.close()
- 
+        res = Response()
+        res.send_file(tmpfile.name)
+        raw = res.build()
+        self.assertIn(b"file content", raw)
+        os.unlink(tmpfile.name)
+
+    def test_send_missing_file(self):
+        res = Response()
+        res.send_file("/nonexistent/file.txt")
+        self.assertEqual(res.status, 404)
+
+
+class TestRouter(unittest.TestCase):
+    def test_static_route(self):
+        router = Router()
+        handler = lambda r, s: "ok"
+        router.add_route("GET", "/hello", handler)
+        matched, params = router.match("GET", "/hello")
+        self.assertEqual(matched, handler)
+        self.assertEqual(params, {})
+
+    def test_param_route(self):
+        router = Router()
+        handler = lambda r, s: "ok"
+        router.add_route("GET", "/users/:id", handler)
+        matched, params = router.match("GET", "/users/42")
+        self.assertEqual(matched, handler)
+        self.assertEqual(params, {"id": "42"})
+
+    def test_multi_params(self):
+        router = Router()
+        handler = lambda r, s: "ok"
+        router.add_route("GET", "/orgs/:org/repos/:repo", handler)
+        matched, params = router.match("GET", "/orgs/acme/repos/web")
+        self.assertEqual(params, {"org": "acme", "repo": "web"})
+
+    def test_wildcard(self):
+        router = Router()
+        handler = lambda r, s: "ok"
+        router.add_route("GET", "/files/*path", handler)
+        matched, params = router.match("GET", "/files/docs/readme.md")
+        self.assertEqual(params, {"path": "docs/readme.md"})
+
+    def test_no_match(self):
+        router = Router()
+        router.add_route("GET", "/hello", lambda r, s: "ok")
+        matched, params = router.match("GET", "/world")
+        self.assertIsNone(matched)
+
+    def test_method_isolation(self):
+        router = Router()
+        get_h = lambda r, s: "get"
+        post_h = lambda r, s: "post"
+        router.add_route("GET", "/item", get_h)
+        router.add_route("POST", "/item", post_h)
+        self.assertEqual(router.match("GET", "/item")[0], get_h)
+        self.assertEqual(router.match("POST", "/item")[0], post_h)
+        self.assertIsNone(router.match("DELETE", "/item")[0])
+
+    def test_route_count(self):
+        router = Router()
+        router.add_route("GET", "/a", lambda r, s: None)
+        router.add_route("POST", "/b", lambda r, s: None)
+        self.assertEqual(router.route_count(), 2)
+
+    def test_list_routes(self):
+        router = Router()
+        router.add_route("GET", "/test", lambda r, s: None)
+        routes = router.list_routes()
+        self.assertEqual(len(routes), 1)
+        self.assertEqual(routes[0]["method"], "GET")
+
+
+if __name__ == "__main__":
+    unittest.main()
