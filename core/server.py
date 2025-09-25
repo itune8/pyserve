@@ -170,3 +170,4 @@ class HTTPServer:
         reset = "\033[0m"
         print(f"  {color}{request.method} {request.path} -> {response.status}{reset} "
               f"[{timestamp}] {request.client_ip}")
+
