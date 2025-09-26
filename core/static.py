@@ -41,4 +41,3 @@ class StaticFileHandler:
             return response.text("Not Found", status=404)
 
         return response.send_file(full_path)
-
