@@ -74,4 +74,3 @@ class ReverseProxy:
 
         except Exception as e:
             return Response(status=502, body=f"Bad Gateway: {e}")
-
