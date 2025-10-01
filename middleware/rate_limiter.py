@@ -52,4 +52,3 @@ def rate_limiter(requests_per_second=10, burst=20):
         return result
 
     return middleware
-
