@@ -20,3 +20,4 @@ def cors_middleware(allowed_origins="*", allowed_methods=None, allowed_headers=N
         return result
 
     return middleware
+
