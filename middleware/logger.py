@@ -13,3 +13,4 @@ def logger_middleware(request, response, next_handler):
         result.set_header("X-Response-Time", f"{elapsed:.2f}ms")
 
     return result
+
