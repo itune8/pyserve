@@ -47,4 +47,3 @@ def basic_auth(credentials):
         return next_handler(request, response)
 
     return middleware
-
