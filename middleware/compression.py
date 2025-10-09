@@ -33,3 +33,4 @@ def compression_middleware(min_size=1024):
         return result
 
     return middleware
+
