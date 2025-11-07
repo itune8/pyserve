@@ -75,3 +75,4 @@ class Router:
 
         pattern = "^" + "/".join(regex_parts) + "$"
         return re.compile(pattern), param_names
+
