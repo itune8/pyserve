@@ -103,4 +103,3 @@ class Response:
 
         header_bytes = "\r\n".join(lines).encode("utf-8") + b"\r\n"
         return header_bytes + self._body
-
