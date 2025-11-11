@@ -89,4 +89,3 @@ class Request:
 
     def get_header(self, name, default=None):
         return self.headers.get(name.lower(), default)
-
