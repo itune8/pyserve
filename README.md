@@ -70,8 +70,3 @@ pyserve/
 │   └── test_server.py           # Unit tests
 └── README.md
 ```
-
-## License
-
-MIT
-
